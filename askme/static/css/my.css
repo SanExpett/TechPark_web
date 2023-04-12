@@ -15,7 +15,7 @@ header {
 }
 
 main {
-  padding-bottom: 50px;
+  padding-bottom: 100px;
 }
 
 footer {
@@ -62,4 +62,12 @@ footer {
 .avatar{
     width: 60px;
     height: 60px;
+}
+
+footer {
+  margin-top: 50px;
+}
+
+.pagination{
+    margin-bottom: 50px;
 }
