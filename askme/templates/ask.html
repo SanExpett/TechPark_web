@@ -1,0 +1,31 @@
+{% extends 'inc/base.html' %}
+{% block 'authorization' %}
+{% include 'inc/authorization_on_bar.html' %}
+{% endblock 'authorization' %}
+{% block main %}
+
+<div class="container">
+    <form action="{% url 'question' %}" method="POST" style="width: 80%">
+        <h2 class="mt-3">Новый вопрос</h2>
+
+        <div class="mt-5 d-flex flex-column gap-4">
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="title-addon">Название</span>
+                <input type="text" class="form-control" id="title" placeholder="Введите название">
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="text-addon">Текст</span>
+                <textarea class="form-control" id="text" rows="6" placeholder="Введите текст"></textarea>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="tags-addon">Теги</span>
+                <input type="text" class="form-control" id="tags" placeholder="Введите теги">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-50 align-self-center">Спросить</button>
+        </div>
+    </form>
+</div>
+{% endblock main %}

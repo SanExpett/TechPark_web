@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="h-100" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="" name="description">
+    <meta content="Mark Otto, Jacob Thornton, and Bootstrap contributors" name="author">
+    <meta content="Hugo 0.88.1" name="generator">
+    <title>HeapIsEternal</title>
+    <link rel="stylesheet" href="{% static "css/bootstrap.css" %}">
+    <link rel="stylesheet" href="{% static "css/my.css" %}">
+    <style>
+
+        .navbar {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #f8f9fa;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .navbar-brand {
+            color: #fd7e14;
+            font-weight: bold;
+        }
+
+        .nav-link,
+        .btn {
+            color: #212529;
+        }
+
+        .btn-outline-light {
+            color: #fd7e14;
+            border-color: #fd7e14;
+        }
+
+        .btn-outline-light:hover {
+            background-color: #fd7e14;
+            color: #fff;
+        }
+
+        .form-control:focus {
+            border-color: #fd7e14;
+            box-shadow: 0 0 0 0.25rem rgba(253, 126, 20, 0.25);
+        }
+
+
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-lg">
+            <a class="navbar-brand" href="{% url 'index' %}">HeapIsEternal</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-between navbar-nav mb-2 mb-lg-0" id="navbarSupportedContent">
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" placeholder="Поиск" aria-label="Search">
+                    <button class="btn btn-outline-light" type="submit">Поиск</button>
+                </form>
+                <div>
+                    {% if quest == None %}
+                    <a class="btn btn-outline-light" href="{% url 'question' %}?new=True">Спросить</a>
+                    {% endif %}
+                     </div>
+                        {% block 'authorization' %}{% endblock 'authorization' %}
+                     </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div id="content" class="container-lg d-flex justify-content-between mt-4" style='margin-bottom: 75px'>
+        {% block main %}{% endblock main %}
+        {% include 'inc/sidebar.html' %}
+    </div>
+   <footer class="position-fixed bottom-0 container-fluid" style="background-color: rgba(255, 255, 255, 0.7); border-top: none; padding: 5px 0;">
+      <div class="container py-3">
+        <p class="text-center mb-0">&copy; HeapIsEternal 2023</p>
+      </div>
+    </footer>
+
+</body>
+
+</html>

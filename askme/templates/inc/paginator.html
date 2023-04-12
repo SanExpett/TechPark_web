@@ -1,0 +1,19 @@
+<nav aria-label="Page navigation example" class='mt-5'>
+    <ul class="pagination">
+        <li class="page-item">
+            <a class="page-link" href="#" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% for p in pages %}
+            <li class="page-item">
+                <a class="page-link" href="{% url the_url %}?page={{p}}">{{p}}</a>
+            </li>
+        {% endfor %}
+        <li class="page-item">
+            <a class="page-link" href="#" aria-label="Next">
+                <span aria-hidden="true">&raquo</span>
+            </a>
+        </li>
+    </ul>
+</nav>

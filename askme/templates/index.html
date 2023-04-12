@@ -1,0 +1,33 @@
+{% extends "inc/base.html" %}
+
+{% block 'authorization' %}
+    {% include 'inc/authorization_on_bar.html' %}
+{% endblock 'authorization' %}
+
+{% block main %}
+
+<div class='d-flex flex-column'>
+    <div class='d-flex flex-row align-items-center gap-5'>
+        <h1>Новые вопросы</h1>
+        <a href="" style='font-size: large'>Самые популярные</a>
+    </div>
+
+     <div class='mt-4 d-flex flex-column gap-5'>
+        {% for question in questions %}
+            {% include "inc/question_item.html" %}
+        {% endfor %}
+     </div>
+
+    {% include 'inc/paginator.html' with the_url='index' %}
+</div>
+<script>
+  document.querySelectorAll('.btn-primary').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      const countEl = event.target.querySelector('span');
+      const count = countEl.textContent;
+      countEl.textContent = +count + 1;
+    });
+  });
+</script>
+{% endblock main %}
+
