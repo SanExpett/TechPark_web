@@ -6,7 +6,7 @@
       <img class="avatar "src="{% static 'img/img_avatar.png' %}"  >
       <button name='btn_question' id={{question.id}} class='btn btn-primary d-flex flex-row gap-2 align-items-center'>
         <i class="bi bi-award" style='font-size: x-large;'></i>
-        <span>{{question.like_count}}</span>
+        <span>{{question.get_likes_count}}</span>
       </button>
     </div>
     <div class='container-fluid d-flex flex-column'>
@@ -16,8 +16,9 @@
         <a href="">Ответы (3)</a>
         <div class='d-flex flex-row gap-2'>
           <span>Теги:</span>
-          <a href="{% url 'tag' %}">Ruby</a>
-          <a href="{% url 'tag' %}">Python</a>
+          {% for tag in question.get_tags %}
+            <a class="question-tag" href="{% url 'tag' tag_name=tag.name %}">{{ tag.name }}</a>
+          {% endfor %}
         </div>
       </div>
     </div>

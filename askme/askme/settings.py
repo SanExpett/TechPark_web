@@ -74,23 +74,25 @@ WSGI_APPLICATION = 'askme.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'db.postgres',
-#         'USER': 'alexey',
-#         'PASSWORD': '958133',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+
+# админка alexey 958133
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'web_db',
+        'USER': 'alex',
+        'PASSWORD': '958133',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
 
 
 # Password validation
