@@ -1,47 +1,17 @@
 {% extends 'inc/base.html' %}
-{% block 'authorization' %}
-{% include 'inc/sign_up_on_bar.html' %}
-{% endblock 'authorization' %}
+{% load static %}
+<!--{% block 'authorization' %}-->
+<!--{% include 'inc/sign_up_on_bar.html' %}-->
+<!--{% endblock 'authorization' %}-->
 {% load bootstrap5 %}
-
-<!--{% block main %}-->
-<!--<div class="container">-->
-<!--  <div class="login-form">-->
-<!--    <h2 class="mb-4">Войти</h2>-->
-<!--    <div class="alert alert-danger" role="alert">-->
-<!--      Извините, пароль неверный-->
-<!--    </div>-->
-<!--    <form>-->
-<!--      <div class="input-group mb-3">-->
-<!--        <span class="input-group-text" style="width: 120px;">Логин</span>-->
-<!--        <input type="text" class="form-control" id="nickname">-->
-<!--      </div>-->
-<!--      <div class="input-group mb-4">-->
-<!--        <span class="input-group-text" style="width: 120px;">Пароль</span>-->
-<!--        <input type="password" class="form-control" id="password">-->
-<!--      </div>-->
-<!--      <button type="submit" class="btn btn-primary btn-block">Войти</button>-->
-<!--    </form>-->
-<!--    <div class="register-link">-->
-<!--      Нет аккаунта? <a href="{% url 'sign_up' %}">Зарегистрироваться</a>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</div>-->
-<!--{% endblock main %}-->
 
 {% block content %}
 
-<form action="{%url 'login' %}">
-  <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">Email address</label>
-    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
-  </div>
-  <div class="mb-3">
-    <label for="exampleInputPassword1" class="form-label">Пароль</label>
-    <input type="password" class="form-control" id="exampleInputPassword1">
-  </div>
-  <button type="submit" class="btn btn-primary">Войти</button>
-</form>
+  <h2>Вход</h2>
+  <form action="/login/" method="post">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button type="submit" class="btn btn-primary">Войти</button>
+  </form>
 
-{% endblock %}
+{% endblock content %}

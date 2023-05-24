@@ -6,8 +6,9 @@ from django.core.paginator import Paginator
 from askme_app.models import *
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
 from askme_app.forms import *
+from askme.settings import LOGIN_URL
 
 def paginate(list_data, per_page, curr_page):
     paginator = Paginator(list_data, per_page)
@@ -66,11 +67,39 @@ def question(request: HttpRequest, question_id: int):
     input_page = int(input_page)
 
     ANSWERS = question_item.get_answers()
+    TAGS = Tag.manager.top_of_tags(10)
+    MEMBERS = Profile.manager.top_of_profiles(10)
+
     page, paginator_data = paginate(ANSWERS, 5, input_page)
-    if not page:
+    if not page and len(list(ANSWERS)) != 0:
         return HttpResponse(status=404)
 
-    context = {'question': question_item, 'id': question_id, 'answers': page.object_list, 'paginator': paginator_data, 'curr_url': 'question'}
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            response = redirect(LOGIN_URL)
+            response['Location'] += f'?next={request.get_full_path()}'
+            return response
+
+        text = request.POST['text']
+        profile_id = Profile.manager.get_profile_by_user_id(request.user.id).id
+        answer_form = AnswerForm(request.POST, question_id=question_id, profile_id=profile_id, initial={'text': text})
+        if answer_form.is_valid():
+            new_answer = answer_form.save()
+            if new_answer:
+                ANSWERS = question_item.get_answers()
+                id_answers = list(question_item.get_id_answers())
+                need_page = id_answers.index((new_answer.id,)) // 5
+
+                response = redirect('question', question_id)
+                response['Location'] += f'?page={need_page}' + f'#answer-{new_answer.id}'
+                return response
+
+    elif request.method == "GET":
+        answer_form = AnswerForm()
+
+    context = {'curr_user': request.user, 'request': request, 'question': question_item, 'id': question_id,
+        'answers': page.object_list, 'paginator': paginator_data, 'curr_url': 'question', 'tags': TAGS,
+        'members': MEMBERS, 'answer_form': answer_form, 'input_page': input_page}
     return render(request, 'question.html', context=context)
 
 
@@ -195,7 +224,7 @@ def login(request: HttpRequest):
         login_form = LoginForm(request.POST, request=request)
 
         if login_form.is_valid():
-            user = auth.authenticate(request=request, **login_form.cleaned_data)
+            user = authenticate(request=request, **login_form.cleaned_data)
             if user is not None:
                 auth_login(request, user)
                 return redirect(next_url)

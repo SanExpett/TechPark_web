@@ -71,3 +71,8 @@ footer {
 .pagination{
     margin-bottom: 50px;
 }
+
+#sidebar {
+  position: fixed;
+  right: 10;
+}
