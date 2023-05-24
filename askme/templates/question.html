@@ -8,42 +8,42 @@
 <div class="container">
   <div class="row">
     <div class="col-12 col-sm-10 col-md-8 col-lg-6 mx-auto mb-4">
-      <div class="card my-3">
-        <div class="card-body">
-          <h3 class="card-title">Какой-то рандомный текст</h3>
-          <p class="card-text">
-            А ещё сделанные на базе интернет-аналитики выводы обнародованы. Противоположная точка зрения подразумевает, что базовые сценарии поведения пользователей
-                набирают популярность среди определенных слоев населения, а значит, должны быть преданы социально-демократической анафеме.
-                Наше дело не так однозначно, как может показаться: семантический разбор внешних противодействий играет важную роль в формировании укрепления моральных
-                ценностей.
-          </p>
-          <div class="d-flex flex-row gap-2">
-            <span>Теги:</span>
-            <a href="#">C++</a>
-            <a href="#">Java</a>
-          </div>
-        </div>
-      </div>
+<!--      <div class="card my-3">-->
+<!--        <div class="card-body">-->
+<!--          <h3 class="card-title">Какой-то рандомный текст</h3>-->
+<!--          <p class="card-text">-->
+<!--            А ещё сделанные на базе интернет-аналитики выводы обнародованы. Противоположная точка зрения подразумевает, что базовые сценарии поведения пользователей-->
+<!--                набирают популярность среди определенных слоев населения, а значит, должны быть преданы социально-демократической анафеме.-->
+<!--                Наше дело не так однозначно, как может показаться: семантический разбор внешних противодействий играет важную роль в формировании укрепления моральных-->
+<!--                ценностей.-->
+<!--          </p>-->
+<!--          <div class="d-flex flex-row gap-2">-->
+<!--            <span>Теги:</span>-->
+<!--            <a href="#">C++</a>-->
+<!--            <a href="#">Java</a>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+      {% include 'inc/question_item.html' %}
 
       <div class="card my-3">
         <div class="card-body">
-          {% for comment in comments %}
+          {% for answer in answers %}
           <div class="d-flex flex-row gap-3 mb-3">
             <img class="avatar "src="{% static 'img/img_avatar.png' %}"  >
             <div class="d-flex flex-column flex-grow-1">
-              <p class="card-text">{{comment.content}}</p>
+              <p class="card-text">{{answer.text}}</p>
               <div class="d-flex gap-2">
                 <button class="btn btn-sm btn-primary text-nowrap">
                   <i class="bi bi-star"></i>
-                  <span>{{comment.like_count}}</span>
+                  <span>{{answer.get_likes_count}}</span>
                 </button>
                 <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    value=""
-                    id="flexCheckDefault"
-                  />
+                  {% if answer.marked_as_correct %}
+                      <input class="form-check-input" type="checkbox" value="" id="flex_check_{{ answer.id }}" Правильно!!!>
+                  {% else %}
+                      <input class="form-check-input" type="checkbox" value="" id="flex_check_{{ answer.id }}">
+                  {% endif %}
                   <label class="form-check-label" for="flexCheckDefault">Правильно!</label>
                 </div>
               </div>
@@ -51,7 +51,7 @@
           </div>
           {% endfor %}
 
-          <form action="{% url 'question' %}" method="post">
+          <form action="{% url 'question' question_id=question.id %}" method="post">
             <div class="mb-3">
               <label for="text" class="form-label fw-bold">Ваш ответ:</label>
               <textarea class="form-control" id="text" rows="6"></textarea>

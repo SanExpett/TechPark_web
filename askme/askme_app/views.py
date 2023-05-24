@@ -1,81 +1,220 @@
 import random
-
+from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest
 from django.views import View
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.core.paginator import Paginator
+from askme_app.models import *
+from django.contrib import auth
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login as auth_login, logout as auth_logout
+from askme_app.forms import *
+
+def paginate(list_data, per_page, curr_page):
+    paginator = Paginator(list_data, per_page)
+    num_pages = paginator.num_pages
+    if curr_page < 0 or curr_page >= num_pages: # проверяем, что текущая не вылезла за все страницы
+        return (0, [])
+    page = paginator.page(curr_page + 1)
+    paginator_data = {
+        'enabled_previous': page.has_previous(), #есть ли предыдущая страница
+        'page_start': 1,
+        'prev_prev_page': curr_page - 1,
+        'prev_page': curr_page,
+        'page': curr_page + 1,
+        'next_page': curr_page + 2,
+        'next_next_page': curr_page + 3,
+        'page_prev_end': num_pages - 1,
+        'page_end': num_pages,
+        'enabled_next': page.has_next()
+    }
+    return (page, paginator_data)
 
 
-el_on_one_pg = 7
-def paginate(objects_list: list, page: int, e_on_p: int = el_on_one_pg):
-    start_index = (page - 1) * e_on_p
-    end_index = start_index + e_on_p
-    return objects_list[start_index:end_index]
+def index(request: HttpRequest):
+    input_page = request.GET.get('page', '0')
+    if not input_page.isdigit():
+        return HttpResponse(status=404)
+    input_page = int(input_page)
+
+    questions = Question.manager.get_new_questions()
+    page, paginator_data = paginate(questions, 10, input_page)
+    if not paginator_data:
+        return HttpResponse(status=404)
+
+    tags = Tag.manager.top_of_tags(10)
+    members = Profile.manager.top_of_profiles(10)
+
+    context = {
+        'questions': page.object_list,
+        'paginator': paginator_data,
+        'curr_url': 'index',
+        'tags': tags,
+        'members': members
+    }
+    return render(request, 'index.html', context=context)
 
 
-class Index(View):
-    def get(self, request, page=1):
-        questions = [{
-            'id': i,
-            'title': 'title ' + str(i),
-            'text': 'text' + str(i),
-            'like_count': random.randint(0, 100)
-        } for i in range(35)]
+def question(request: HttpRequest, question_id: int):
+    try:
+        question_item = Question.manager.get_question_by_id(question_id)
+    except:
+        return HttpResponseBadRequest()
 
-        pages = len(questions) // el_on_one_pg
-        questions = paginate(questions, page)
+    input_page = request.GET.get('page', '0')
+    if not input_page.isdigit():
+        return HttpResponse(status=404)
+    input_page = int(input_page)
 
-        context = {
-            'pages': range(1, pages + 1),
-            'questions': questions
-        }
+    ANSWERS = question_item.get_answers()
+    page, paginator_data = paginate(ANSWERS, 5, input_page)
+    if not page:
+        return HttpResponse(status=404)
 
-        return render(request, 'index.html', context)
-
-
-class Question(View):
-    def get(self, request):
-        new = request.GET.get('new', False)
-        if new:
-            return render(request, 'ask.html')
-
-        page = request.GET.get('page', 1)
-
-        comments = [{
-            'id': i,
-            'content': 'title ' + str(i),
-            'likes_count': random.randint(0, 100)
-        } for i in range(35)]
-        pages = len(comments) // 7
-        comments = paginate(comments, page, e_on_p=7)
-        context = {
-            'comments': comments,
-            'pages': range(1, pages + 1)
-        }
-        return render(request, 'question.html', context=context)
-
-    def post(self, request):
-        return HttpResponse(200)
+    context = {'question': question_item, 'id': question_id, 'answers': page.object_list, 'paginator': paginator_data, 'curr_url': 'question'}
+    return render(request, 'question.html', context=context)
 
 
+def hot(request: HttpRequest):
+    input_page = request.GET.get('page', '0')
+    if not input_page.isdigit():
+        return HttpResponse(status=404)
+    input_page = int(input_page)
 
-class Settings(View):
-    def get(self, request):
-        return render(request, 'settings.html')
+    questions = Question.manager.get_top_questions()
+    page, paginator_data = paginate(questions, 10, input_page)
+    if not paginator_data:
+        return HttpResponse(status=404)
+
+    tags = Tag.manager.top_of_tags(10)
+    members = Profile.manager.top_of_profiles(10)
+
+    context = {'questions': page.object_list, 'paginator': paginator_data,
+        'curr_url': 'hot', 'tags': tags, 'members': members}
+    return render(request, 'hot.html', context=context)
 
 
-class Tag(View):
-    def get(self, request):
-        return render(request, 'tag.html')
+@login_required
+def settings(request: HttpRequest):
+
+    if request.method == "POST":
+        curr_username, email, avatar = request.user.username, request.POST['email'], request.POST['avatar']
+
+        settings_form = SettingsForm(request.POST, request=request, initial={'username': curr_username, 'email': email, 'avatar': avatar})
+
+        if settings_form.is_valid():
+            settings_form.update()
+
+    elif request.method == "GET":
+        user_id = request.user.id
+        user, profile = Profile.manager.get_user_by_id(user_id), Profile.manager.get_profile_by_user_id(user_id)
+        settings_form = SettingsForm(initial={'username': user.username, 'email': user.email, 'avatar': profile.avatar})
+
+    TAGS = Tag.objects.top_of_tags()
+    MEMBERS = Profile.objects.top_of_profiles()
+
+    context = {'curr_user': request.user, 'request': request,
+        'curr_url': 'settings', 'tags': TAGS, 'members': MEMBERS,
+        'form': settings_form}
+    return render(request, 'settings.html', context=context)
 
 
-class Signup(View):
-    def get(self, request):
-        return render(request, 'sign_up.html')
+def tag(request: HttpRequest, tag_name: str):
+    input_page = request.GET.get('page', '0')
+    if not input_page.isdigit():
+        return HttpResponse(status=404)
+    input_page = int(input_page)
+
+    try:
+        questions = Tag.manager.get_questions_by_tag(tag_name)
+    except:
+        return HttpResponseBadRequest()
+
+    page, paginator_data = paginate(questions, 10, input_page)
+    if not paginator_data:
+        return HttpResponse(status=404)
+
+    tags = Tag.manager.top_of_tags(10)
+    members = Profile.manager.top_of_profiles(10)
+
+    context = {'tag': tag_name, 'questions': page.object_list, 'paginator': paginator_data,
+        'curr_url': 'tag', 'tags': tags, 'members': members}
+    # context = {'questions': page.object_list, 'paginator': paginator_data, 'curr_url': 'tag'}
+    return render(request, 'tag.html', context=context)
+
+@login_required
+def ask(request: HttpRequest):
+
+    if request.method == "POST":
+        title, text, tags = request.POST['title'], request.POST['text'], request.POST['tags']
+        profile_id = Profile.objects.get_profile_by_user_id(request.user.id).id
+        ask_form = AskForm(request.POST, profile_id=profile_id, initial={"title": title, "text": text, "tags": tags})
+        if ask_form.is_valid():
+            new_question = ask_form.save()
+            if new_question:
+                return redirect('question', question_id=new_question.id)
+
+    elif request.method == "GET":
+        ask_form = AskForm()
+
+    TAGS = Tag.manager.top_of_tags(10)
+    MEMBERS = Profile.manager.top_of_profiles(10)
+
+    context = {'curr_user': request.user, 'request': request, 'curr_url': 'ask', 'tags': TAGS,
+        'members': MEMBERS, 'ask_form': ask_form}
+    return render(request, 'ask.html', context=context)
 
 
-class Login(View):
-    def get(self, request):
-        return render(request, 'login.html')
+def signup(request: HttpRequest):
+
+    if request.method == "POST":
+        signup_form = SignUpForm(request.POST)
+
+        if signup_form.is_valid():
+            user = signup_form.save()
+            if user:
+                auth_login(request, user)
+                return redirect('index')
+
+    elif request.method == "GET":
+        signup_form = SignUpForm()
+
+    TAGS = Tag.manager.top_of_tags(10)
+    MEMBERS = Profile.manager.top_of_profiles(10)
+
+    context = {'curr_user': request.user, 'curr_url': 'sign_up', 'request': request,
+        'form': signup_form, 'tags': TAGS, 'members': MEMBERS}
+    return render(request, 'sign_up.html', context=context)
+
+
+def login(request: HttpRequest):
+
+    next_url = request.GET.get('next', 'index')
+
+    if request.method == "POST":
+
+        login_form = LoginForm(request.POST, request=request)
+
+        if login_form.is_valid():
+            user = auth.authenticate(request=request, **login_form.cleaned_data)
+            if user is not None:
+                auth_login(request, user)
+                return redirect(next_url)
+
+    elif request.method == "GET":
+        login_form = LoginForm()
+
+    TAGS = Tag.manager.top_of_tags(10)
+    MEMBERS = Profile.manager.top_of_profiles(10)
+
+    context = {'curr_user': request.user, 'request': request, 'curr_url': 'login',
+        'form': login_form, 'next_url': next_url, 'tags': TAGS, 'members': MEMBERS}
+    return render(request, 'login.html', context=context)
+
+def logout(request: HttpRequest):
+    next_url = request.GET.get('next', 'index')
+
+    auth_logout(request)
+    return redirect(next_url)
 
 
 

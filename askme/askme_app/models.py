@@ -7,8 +7,16 @@ class ProfileManager(models.Manager):
         return super().get_queryset().annotate(question_count=Count('questions')).order_by('-question_count')
 
     def top_of_profiles(self, n):
-        qs = self.get_queryset()[:n]
-        return [profile for profile in qs if profile.question_count > 0]
+        return Profile.manager.annotate(Count('answers')).order_by('-answers__count')[:n]
+
+    def existence_username(self, username):
+        return User.objects.filter(username=username).exists()
+
+    def get_user_by_id(self, user_id):
+        return User.objects.get(pk=user_id)
+
+    def get_profile_by_user_id(self, user_id):
+        return Profile.manager.get(user_id=user_id)
 
 
 class Profile(models.Model):
@@ -28,6 +36,8 @@ class TagManager(models.Manager):
     def top_of_tags(self, n):
         return self.get_queryset().annotate(num_questions=Count('questions')).order_by('-num_questions')[:n]
 
+    def get_tag_by_name(self, tag_name):
+        return Tag.objects.get(name=tag_name)
 
 class Tag(models.Model):
     name = models.CharField(max_length=20, unique=True)
@@ -56,14 +66,17 @@ class QuestionLike(models.Model):
 
     manager = QuestionLikeManager()
 
+    class Meta:
+        unique_together = ['question', 'who_liked']
+
 class QuestionManager(models.Manager):
     def get_new_questions(self):
         return Question.manager.all().order_by('pub_date')
 
-    def get_top_questions(self, top_n):
+    def get_top_questions(self):
         return self.get_queryset().annotate(num_likes=Count('question_likes')) \
                    .order_by('-num_likes') \
-                   .prefetch_related('question_likes')[:top_n]
+                   .prefetch_related('question_likes')
 
     def get_count_of_questions(self):
         return Question.manager.all().count()
@@ -114,6 +127,9 @@ class AnswerLike(models.Model):
 
     manager = AnswerLikeManager()
 
+    class Meta:
+        unique_together = ['answer', 'who_liked']
+
 class AnswerManager(models.Manager):
     pass
 
@@ -135,15 +151,4 @@ class Answer(models.Model):
 
     def get_correctness(self):
         return self.marked_as_correct
-
-
-
-
-
-
-
-
-
-
-
 

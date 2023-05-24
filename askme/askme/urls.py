@@ -20,11 +20,14 @@ from askme_app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.Index.as_view(), name='index'),
-    path('question', views.Question.as_view(), name='question'),
-    path('settings', views.Settings.as_view(), name='settings'),
-    path('tag', views.Tag.as_view(), name='tag'),
-    path('sign_up', views.Signup.as_view(), name='sign_up'),
-    path('login', views.Login.as_view(), name='login'),
+    path('', views.index, name='index'),
+    path('question/<int:question_id>/', views.question, name='question'),
+    path('settings', views.settings, name='settings'),
+    path('tag/<str:tag_name>/', views.tag, name='tag'),
+    path('sign_up/', views.signup, name='sign_up'),
+    path('login/', views.login, name='login'),
+    path('logout/', views.logout, name='logout'),
+    path('ask/', views.ask, name='ask'),
+    path('hot/', views.hot, name='hot')
 ]
 

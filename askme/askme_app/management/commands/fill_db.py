@@ -2,14 +2,13 @@ from askme_app.models import Tag, Profile, Question, Answer, QuestionLike, Answe
 from django.core.management.base import BaseCommand
 from itertools import islice
 from django.contrib.auth.models import User
-from django.db.models import Count
-from django.db import transaction
+
 
 class Command(BaseCommand):
     help = 'Заполняем бд'
 
-    STEP = 1000
-    RATIO = 10000
+    STEP = 10
+    RATIO = 100
 
 
     def add_arguments(self, parser):
@@ -17,49 +16,45 @@ class Command(BaseCommand):
 
 
     def fill_questions_likes(self, ratio):
-        profiles = Profile.manager.all()[:1001]
-        questions = Question.manager.all()[:1001]
+        profiles = Profile.manager.all()
+        questions = Question.manager.all()
 
-        batch_size = 10000
+        batch_size = 100
         objs = []
 
         iter = 0
         for i in profiles:
             for j in questions:
                 question_like = QuestionLike()
-                question_like.profile = i
+                question_like.who_liked = i
                 question_like.question = j
                 objs.append(question_like)
             iter += 1
-            print(iter)
-            if iter == 25:
-                objs = (y for y in objs)
-                QuestionLike.manager.bulk_create(objs)
-                iter = 0
-                objs = []
+            objs = (y for y in objs)
+            QuestionLike.manager.bulk_create(objs)
+            iter = 0
+            objs = []
 
 
-    def fill_vote_answers(self, ratio):
-        profiles = Profile.manager.all()[:1001]
-        answers = Answer.manager.all()[:1001]
+    def fill_answers_likes(self, ratio):
+        profiles = Profile.manager.all()
+        answers = Answer.manager.all()
 
-        batch_size = 10000
+        batch_size = 100
         objs = []
 
         iter = 0
         for i in profiles:
             for j in answers:
                 answer_like = AnswerLike()
-                answer_like.profile = i
+                answer_like.who_liked = i
                 answer_like.answer = j
                 objs.append(answer_like)
             iter += 1
-            print(iter)
-            if iter == 25:
-                objs = (y for y in objs)
-                AnswerLike.manager.bulk_create(objs)
-                iter = 0
-                objs = []
+            objs = (y for y in objs)
+            AnswerLike.manager.bulk_create(objs)
+            iter = 0
+            objs = []
 
 
     def fill_profiles(self, ratio):
@@ -133,47 +128,47 @@ class Command(BaseCommand):
             pass
 
 
-    # def fill_answers(self, ratio):
-    #     profiles = Profile.manager.all()
-    #     questions = Question.manager.all()
-    #     batch_size = 10000
-    #     objs = []
-    #     i = 0
-    #     for profile in profiles:
-    #         for question in questions:
-    #             answer = Answer(text='Some text of the answer #%s' % i, marked_as_correct=bool(i))
-    #             i += 1
-    #             answer.author = profile
-    #             answer.question = question
-    #             objs.append(answer)
-    #
-    #     objs = (y for y in objs)
-    #     while True:
-    #         batch = list(islice(objs, batch_size))
-    #         if not batch:
-    #             break
-    #         Answer.manager.bulk_create(batch, batch_size)
-
-
     def fill_answers(self, ratio):
-        profiles = Profile.manager.all().select_related()
-        questions = Question.manager.all().select_related()
-        batch_size = 10000
+        profiles = Profile.manager.all()
+        questions = Question.manager.all()
+        batch_size = 100
+        objs = []
+        i = 0
+        for profile in profiles:
+            for question in questions:
+                answer = Answer(text='Some text of the answer #%s' % i, marked_as_correct=bool(i))
+                i += 1
+                answer.author = profile
+                answer.question = question
+                objs.append(answer)
 
-        objs = (Answer(text='Some text of the answer #%s' % i, marked_as_correct=bool(i),
-                       author=profile, question=question)
-                for i, profile in enumerate(profiles)
-                for question in questions)
+        objs = (y for y in objs)
+        while True:
+            batch = list(islice(objs, batch_size))
+            if not batch:
+                break
+            Answer.manager.bulk_create(batch, batch_size)
 
-        with transaction.atomic():
-            while True:
-                batch = list(islice(objs, batch_size))
-                if not batch:
-                    break
-                try:
-                    Answer.manager.bulk_create(batch, batch_size)
-                except Exception as e:
-                    print(f"Error: {e}")
+    #
+    # def fill_answers(self, ratio):
+    #     profiles = Profile.manager.all().select_related()
+    #     questions = Question.manager.all().select_related()
+    #     batch_size = 10000
+    #
+    #     objs = (Answer(text='Some text of the answer #%s' % i, marked_as_correct=bool(i),
+    #                    author=profile, question=question)
+    #             for i, profile in enumerate(profiles)
+    #             for question in questions)
+    #
+    #     with transaction.atomic():
+    #         while True:
+    #             batch = list(islice(objs, batch_size))
+    #             if not batch:
+    #                 break
+    #             try:
+    #                 Answer.manager.bulk_create(batch, batch_size)
+    #             except Exception as e:
+    #                 print(f"Error: {e}")
 
 
     def update_tags_name(self):
@@ -186,31 +181,43 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         ratio = options['ratio']
-        print(f"ratio = {ratio}")
+        # print(f"ratio = {ratio}")
         # Tag.manager.all().delete()
-        # # print("TAGS WILL FILL")
-        # # self.fill_tags(ratio + 1)
+        # print("TAGS WILL FILL")
+        # self.fill_tags(ratio + 1)
         # print("TAGS FILLED")
 
         # User.objects.all().delete()
-        # # print("USERS WILL FILL")
-        # # self.fill_users(ratio + 1)
+        # print("USERS WILL FILL")
+        # self.fill_users(ratio + 1)
         # print("USERS FILLED")
-        #
+
         # Profile.manager.all().delete()
-        # # print("PROFILES WILL FILL")
-        # # self.fill_profiles(ratio + 1)
+        # print("PROFILES WILL FILL")
+        # self.fill_profiles(ratio + 1)
         # print("PROFILES FILLED")
 
-        Question.manager.all().delete()
+        # Question.manager.all().delete()
         # print("QUESTIONS WILL FILL")
         # self.fill_questions(ratio * 10 + 1)
         # print("QUESTIONS FILLED")
         # print("QUESTIONS WILL UPDATE")
         # self.add_tags_to_questions()
-        print("QUESTIONS UPDATED")
+        # print("QUESTIONS UPDATED")
 
         # Answer.manager.all().delete()
-        # # print("ANSWERS WILL FILL")
-        # # self.fill_answers(ratio * 100 + 1)
+        # print("ANSWERS WILL FILL")
+        # self.fill_answers(ratio * 100 + 1)
         # print("ANSWERS FILLED")
+        #
+        # QuestionLike.manager.all().delete()
+        # print("VoteQuestion WILL FILL")
+        # self.fill_questions_likes(ratio * 100 + 1)
+        # print("VoteQuestion FILLED")
+
+        # AnswerLike.manager.all().delete()
+        # print("VoteQuestion WILL FILL")
+        # self.fill_answers_likes(ratio * 100 + 1)
+        # print("VoteQuestion FILLED")
+        # print(Tag.manager.top_of_tags(10))
+

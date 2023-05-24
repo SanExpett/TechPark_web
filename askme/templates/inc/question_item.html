@@ -10,10 +10,10 @@
       </button>
     </div>
     <div class='container-fluid d-flex flex-column'>
-      <a href="{% url 'question' %}" style='font-size: x-large'>{{question.title}}</a>
+      <a href="{% url 'question' question_id=question.id %}" style='font-size: x-large'>{{question.title}}</a>
       <p>{{question.text}}</p>
       <div class='d-flex flex-row justify-content-between'>
-        <a href="">Ответы (3)</a>
+        <a href="">Ответы ({{ question.get_answers_count }})</a>
         <div class='d-flex flex-row gap-2'>
           <span>Теги:</span>
           {% for tag in question.get_tags %}

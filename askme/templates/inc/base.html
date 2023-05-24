@@ -28,7 +28,7 @@
                 </form>
                 <div>
                     {% if quest == None %}
-                    <a class="btn btn-outline-light" href="{% url 'question' %}?new=True">Спросить</a>
+                    <a class="btn btn-outline-light" href="{% url 'ask' %}?new=True">Спросить</a>
                     {% endif %}
                      </div>
                         {% block 'authorization' %}{% endblock 'authorization' %}
@@ -46,6 +46,10 @@
         <p class="text-center mb-0">&copy; HeapIsEternal 2023</p>
       </div>
     </footer>
+
+<script>
+  var csrftoken = '{{ csrf_token }}';
+</script>
 
 </body>
 
