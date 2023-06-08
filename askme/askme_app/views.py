@@ -290,7 +290,7 @@ def like_answer(request: HttpRequest):
 
 
 @require_http_methods(["POST"])
-def correctness(request: HttpRequest):
+def marked_as_correct(request: HttpRequest):
     if not request.user.is_authenticated:
         return JsonResponse({'status': 'not_auth'})
     try:
@@ -299,11 +299,11 @@ def correctness(request: HttpRequest):
 
         some_answer = Answer.objects.get_answer_by_id(answer_id)
 
-        if iscorrectness == 0:
+        if marked_as_correct == 0:
             some_answer.marked_as_correct = True
             some_answer.save()
             marked_as_correct = 1
-        elif iscorrectness == 1:
+        elif marked_as_correct == 1:
             some_answer.marked_as_correct = False
             some_answer.save()
             marked_as_correct = 0

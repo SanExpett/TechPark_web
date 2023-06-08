@@ -74,14 +74,14 @@ $(".form-check-input").on('click', function (ev) {
     var this_elem = document.getElementById('flex_check_' + $(this).data('id'));
 
     const request = new Request(
-        'http://127.0.0.1:8000/correctness/',
+        'http://127.0.0.1:8000/marked_as_correct/',
         {
             method: 'POST',
             headers: {
                 'X-CSRFToken': csrftoken,
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
             },
-            body: 'answer_id=' + $(this).data('id') + '&iscorrectness=' + this_elem.getAttribute('data-iscorrectness')
+            body: 'answer_id=' + $(this).data('id') + '&marked_as_correct=' + this_elem.getAttribute('data-marked_as_correct')
         }
     )
 
@@ -89,8 +89,8 @@ $(".form-check-input").on('click', function (ev) {
         response_raw => response_raw.json().then(
             response_json => {
                 if (response_json.status == "ok") {
-                    this_elem.setAttribute("data-iscorrectness", response_json.iscorrectness);
-                    if (response_json.iscorrectness == 1) {
+                    this_elem.setAttribute("data-marked_as_correct", response_json.marked_as_correct);
+                    if (response_json.marked_as_correct == 1) {
                         document.getElementById('flex_check_' + $(this).data('id')).checked = true;
                     } else {
                         document.getElementById('flex_check_' + $(this).data('id')).checked = false;
