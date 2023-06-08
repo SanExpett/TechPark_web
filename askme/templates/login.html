@@ -7,11 +7,15 @@
 
 {% block content %}
 
-  <h2>Вход</h2>
-  <form action="/login/" method="post">
-    {% csrf_token %}
-    {% bootstrap_form form %}
-    <button type="submit" class="btn btn-primary">Войти</button>
-  </form>
+<div class="dflex mbottom">
+  <h1 class="dinline">Вход</h1>
+  <a class="mleft" href="{% url 'sign_up' %}">Регистрация</a>
+</div>
 
-{% endblock content %}
+<form novalidate class="col-12" action="/login/?next={{ next_url }}" method="post">
+  {% csrf_token %}
+  {% bootstrap_form form %}
+  <button type="submit" class="btn btn-primary button_margin_top_10">Войти</button>
+</form>
+
+{% endblock %}

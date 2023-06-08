@@ -1,7 +1,7 @@
 import random
 from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest
 from django.views import View
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from askme_app.models import *
 from django.contrib import auth
@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
 from askme_app.forms import *
 from askme.settings import LOGIN_URL
+from django.views.decorators.http import require_http_methods
 
 def paginate(list_data, per_page, curr_page):
     paginator = Paginator(list_data, per_page)
@@ -102,6 +103,30 @@ def question(request: HttpRequest, question_id: int):
         'members': MEMBERS, 'answer_form': answer_form, 'input_page': input_page}
     return render(request, 'question.html', context=context)
 
+
+@require_http_methods(["POST"])
+def like_question(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': 'not_auth'})
+    try:
+        question_id = int(request.POST['question_id'])
+        islike = int(request.POST['islike'])
+
+        some_question = Question.objects.get_question_by_id(question_id)
+
+        profile_id = request.user.profile.id
+
+        if islike == 0:
+            VoteQuestion.objects.create_vote_question_by_profile_and_question_id(question_id, profile_id)
+            islike = 1
+        elif islike == 1:
+            vote = VoteQuestion.objects.get_vote_question_by_profile_and_question_id(question_id, profile_id)
+            vote.delete()
+            islike = 0
+
+        return JsonResponse({'status': 'ok', 'islike': islike, 'likes_count': some_question.get_likes_count()})
+    except:
+        return JsonResponse({'status': 'error'})
 
 def hot(request: HttpRequest):
     input_page = request.GET.get('page', '0')
@@ -238,6 +263,55 @@ def login(request: HttpRequest):
     context = {'curr_user': request.user, 'request': request, 'curr_url': 'login',
         'form': login_form, 'next_url': next_url, 'tags': TAGS, 'members': MEMBERS}
     return render(request, 'login.html', context=context)
+
+@require_http_methods(["POST"])
+def like_answer(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': 'not_auth'})
+    try:
+        answer_id = int(request.POST['answer_id'])
+        islike = int(request.POST['islike'])
+
+        some_answer = Answer.objects.get_answer_by_id(answer_id)
+
+        profile_id = request.user.profile.id
+
+        if islike == 0:
+            AnswerLike.objects.create_vote_answer_by_profile_and_answer_id(answer_id, profile_id)
+            islike = 1
+        elif islike == 1:
+            vote = AnswerLike.objects.get_vote_answer_by_profile_and_answer_id(answer_id, profile_id)
+            vote.delete()
+            islike = 0
+
+        return JsonResponse({'status': 'ok', 'islike': islike, 'likes_count': some_answer.get_likes_count()})
+    except:
+        return JsonResponse({'status': 'error'})
+
+
+@require_http_methods(["POST"])
+def correctness(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': 'not_auth'})
+    try:
+        answer_id = int(request.POST['answer_id'])
+        marked_as_correct = int(request.POST['marked_as_correct'])
+
+        some_answer = Answer.objects.get_answer_by_id(answer_id)
+
+        if iscorrectness == 0:
+            some_answer.marked_as_correct = True
+            some_answer.save()
+            marked_as_correct = 1
+        elif iscorrectness == 1:
+            some_answer.marked_as_correct = False
+            some_answer.save()
+            marked_as_correct = 0
+
+        return JsonResponse({'status': 'ok', 'marked_as_correct': marked_as_correct})
+    except:
+        return JsonResponse({'status': 'error'})
+
 
 def logout(request: HttpRequest):
     next_url = request.GET.get('next', 'index')

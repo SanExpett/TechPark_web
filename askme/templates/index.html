@@ -20,16 +20,6 @@
 
     {% include 'inc/paginator.html' with the_url='index' %}
 </div>
-<script>
 
-  document.querySelectorAll('.btn-primary').forEach((button) => {
-    button.addEventListener('click', (event) => {
-      const countEl = event.currentTarget.querySelector('span');
-      const count = parseInt(countEl.textContent);
-      countEl.textContent = count + 1;
-    });
-  });
-
-</script>
 {% endblock main %}
 
