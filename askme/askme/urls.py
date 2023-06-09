@@ -42,7 +42,7 @@ from askme_app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('app.urls'))
+    path('', include('askme_app.urls'))
 ]
 
 if settings.DEBUG:
