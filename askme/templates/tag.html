@@ -1,14 +1,13 @@
 {% extends 'inc/base.html' %}
-{% block 'authroization' %}
-{% include 'inc/authroization_on_bar.html' %}
-{% endblock 'authroization' %}
 {% load static %}
+
+
 {% block content %}
 
 <div class="dflex mbottom">
-  <h1 class="dinline">Tag: {{ tag.name }}</h1>
-  <a class="mleft" href="{% url 'index' %}">New Questions</a>
-  <a class="mleft" href="{% url 'hot' %}">Hot Questions</a>
+  <h1 class="dinline">Тег: {{ tag.name }}</h1>
+  <a class="mleft" href="{% url 'index' %}">Новые вопросы</a>
+  <a class="mleft" href="{% url 'hot' %}">Самые популярные</a>
 </div>
 
 {% for question in questions %}

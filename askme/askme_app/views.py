@@ -163,8 +163,8 @@ def settings(request: HttpRequest):
         user, profile = Profile.manager.get_user_by_id(user_id), Profile.manager.get_profile_by_user_id(user_id)
         settings_form = SettingsForm(initial={'username': user.username, 'email': user.email, 'avatar': profile.avatar})
 
-    TAGS = Tag.objects.top_of_tags()
-    MEMBERS = Profile.objects.top_of_profiles()
+    TAGS = Tag.manager.top_of_tags(10)
+    MEMBERS = Profile.manager.top_of_profiles(10)
 
     context = {'curr_user': request.user, 'request': request,
         'curr_url': 'settings', 'tags': TAGS, 'members': MEMBERS,

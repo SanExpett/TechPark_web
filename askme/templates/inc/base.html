@@ -16,6 +16,8 @@
 
 <header>
   <nav class="hcenter">
+
+
     <div class="search">
       <form class="d-flex" role="search">
         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
@@ -50,7 +52,7 @@
           </div>
 
           <div class="fl">
-            <p class="username">INCOGNITO</p>
+            <p class="username">ANONIMUS</p>
             <div class="authorization">
               {% if curr_url == 'sign_up' %}
                 <a class="r" href="#">Регистрация</a>
@@ -94,14 +96,14 @@
       <div class="col-4">
         <div class="popular-zone">
           <div class="tags">
-            <h2>Popular Tags</h2>
+            <h2>Популярные теги</h2>
             {% for some_tag in tags %}
               <a class="tag" id="tag-{{forloop.counter}}" href="{% url 'tag' tag_name=some_tag.name %}">{{some_tag.name}}</a>
             {% endfor %}
           </div>
 
           <div class="members">
-            <h2>Best Members</h2>
+            <h2>Лучшие участники</h2>
             {% for some_member in members %}
               <a class="member" id="member-{{forloop.counter}}" href="#">{{some_member.user.username}}</a>
             {% endfor %}
